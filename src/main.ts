@@ -25,6 +25,10 @@ export async function run(): Promise<void> {
 
     const title = pr.title
     const branchName = pr.head.ref
+
+    core.debug(`Title: ${title}`)
+    core.debug(`Branch name: ${branchName}`)
+
     const pattern = new RegExp(
       core.getInput('jira-issue-regex') || DEFAULT_TICKET_REGEX
     )
