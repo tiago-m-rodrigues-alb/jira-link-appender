@@ -37,6 +37,12 @@ export async function run(): Promise<void> {
     const issueId =
       extractIssueId(title, pattern) || extractIssueId(branchName, pattern)
 
+    if (issueId === null) {
+      core.setFailed(
+        `FAILED: ${pattern} not found in ${title} or ${branchName}`
+      )
+      return
+    }
     const link = `${jiraProjectUrl}/${issueId}`
 
     await octokit.rest.pulls.update({
