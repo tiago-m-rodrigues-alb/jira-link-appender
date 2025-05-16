@@ -1,6 +1,8 @@
-name: The name of your action here
-description: Provide a description here
-author: Your name or organization here
+name: JIRA link appender action
+description:
+  This action appends a JIRA link to PR body. The issue ID is extracted from the
+  branch name or PR title.
+author: tiago-m-rodrigues-alb
 
 # Add your action's branding here. This will appear on the GitHub Marketplace.
 branding:
@@ -9,15 +11,23 @@ branding:
 
 # Define your inputs here.
 inputs:
-  milliseconds:
-    description: Your input description here
+  jira-project-url:
+    description: 'Link of your project URL'
     required: true
-    default: '1000'
+  jira-issue-regex:
+    description:
+      'The regex to extract the issue ID from the branch name or PR title'
+    required: false
+  GITHUB_TOKEN:
+    description: 'Automatically added token'
+    required: true
 
 # Define your outputs here.
 outputs:
-  time:
-    description: Your output description here
+  jira-issue-id:
+    description: The JIRA issue ID
+  jira-issue-link:
+    description: The JIRA issue link
 
 runs:
   using: node20
