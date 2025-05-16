@@ -31234,8 +31234,8 @@ function extractIssueId(source, pattern) {
     // Match the branch name against the pattern
     const match = source.match(pattern);
     // If a match is found, return the issue ID
-    if (match && match[1]) {
-        return match[1];
+    if (match && match[0]) {
+        return match[0];
     }
     // If no match is found, return null
     return null;
@@ -31258,9 +31258,15 @@ async function run() {
         }
         const title = pr.title;
         const branchName = pr.head.ref;
+        coreExports.info(`Title: ${title}`);
+        coreExports.info(`Branch name: ${branchName}`);
         const pattern = new RegExp(coreExports.getInput('jira-issue-regex') || DEFAULT_TICKET_REGEX);
         const jiraProjectUrl = coreExports.getInput('jira-project-url');
         const issueId = extractIssueId(title, pattern) || extractIssueId(branchName, pattern);
+        if (issueId === null) {
+            coreExports.setFailed(`FAILED: ${pattern} not found in ${title} or ${branchName}`);
+            return;
+        }
         const link = `${jiraProjectUrl}/${issueId}`;
         await octokit.rest.pulls.update({
             ...githubExports.context.repo,
