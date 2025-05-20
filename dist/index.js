@@ -31241,7 +31241,7 @@ function extractIssueId(source, pattern) {
     return null;
 }
 
-const DEFAULT_TICKET_REGEX = /^[A-Z,a-z]{2,}-\d{1,}/g;
+const DEFAULT_ISSUE_REGEX = /^[A-Z,a-z]{2,}-\d{1,}/g;
 /**
  * The main function for the action.
  *
@@ -31251,35 +31251,41 @@ async function run() {
     try {
         const githubToken = coreExports.getInput('GITHUB_TOKEN');
         const octokit = githubExports.getOctokit(githubToken);
-        const pr = githubExports.context.payload.pull_request;
-        if (pr === null || pr === undefined) {
+        const pullRequest = githubExports.context.payload.pull_request;
+        if (pullRequest === null || pullRequest === undefined) {
             coreExports.setFailed('No pull request found.');
             return;
         }
-        const title = pr.title;
-        const branchName = pr.head.ref;
+        const title = pullRequest.title;
+        const branchName = pullRequest.head.ref;
         coreExports.info(`Title: ${title}`);
         coreExports.info(`Branch name: ${branchName}`);
-        const pattern = new RegExp(coreExports.getInput('jira-issue-regex') || DEFAULT_TICKET_REGEX);
+        const pattern = new RegExp(coreExports.getInput('jira-issue-regex') || DEFAULT_ISSUE_REGEX);
         const jiraProjectUrl = coreExports.getInput('jira-project-url');
         const issueId = extractIssueId(title, pattern) || extractIssueId(branchName, pattern);
         if (issueId === null) {
             coreExports.setFailed(`FAILED: ${pattern} not found in ${title} or ${branchName}`);
             return;
         }
-        const link = `${jiraProjectUrl}/${issueId}`;
+        const url = `${jiraProjectUrl}/${issueId}`;
+        const link = `[${issueId}](${url})\n\n---\n`;
+        const startsWithRegex = new RegExp(`^${link}`, 'i');
+        if (pullRequest.body?.match(startsWithRegex)) {
+            return;
+        }
         await octokit.rest.pulls.update({
             ...githubExports.context.repo,
-            pull_number: pr.number,
-            body: `${pr.body} \n\n ----- \nJira link: [${issueId}](${link})`
+            pull_number: pullRequest.number,
+            body: `${link}${pullRequest.body}`
         });
         coreExports.setOutput('jira-issue-id', issueId);
         coreExports.setOutput('jira-issue-link', link);
     }
     catch (error) {
         // Fail the workflow run if an error occurs
-        if (error instanceof Error)
+        if (error instanceof Error) {
             coreExports.setFailed(error.message);
+        }
     }
 }
 
