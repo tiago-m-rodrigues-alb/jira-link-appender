@@ -31268,7 +31268,7 @@ async function run() {
             return;
         }
         const url = `${jiraProjectUrl}/${issueId}`;
-        const link = `[${issueId}](${url})\n\n---\n`;
+        const link = `[${issueId}](${url})\n---\n`;
         if (pullRequest.body?.startsWith(link)) {
             return;
         }
