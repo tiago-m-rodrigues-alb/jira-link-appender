@@ -31278,7 +31278,7 @@ async function run() {
             body: `${link}${pullRequest.body ?? ''}`
         });
         coreExports.setOutput('jira-issue-id', issueId);
-        coreExports.setOutput('jira-issue-link', link);
+        coreExports.setOutput('jira-issue-url', url);
     }
     catch (error) {
         // Fail the workflow run if an error occurs

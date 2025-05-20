@@ -59,7 +59,7 @@ export async function run(): Promise<void> {
     });
 
     core.setOutput('jira-issue-id', issueId);
-    core.setOutput('jira-issue-link', link);
+    core.setOutput('jira-issue-url', url);
   } catch (error) {
     // Fail the workflow run if an error occurs
     if (error instanceof Error) {
