@@ -47,9 +47,8 @@ export async function run(): Promise<void> {
     }
     const url = `${jiraProjectUrl}/${issueId}`;
     const link = `[${issueId}](${url})\n\n---\n`;
-    const startsWithRegex = new RegExp(`^${link}`, 'i');
 
-    if (pullRequest.body?.match(startsWithRegex)) {
+    if (pullRequest.body?.startsWith(link)) {
       return;
     }
 

@@ -31269,8 +31269,7 @@ async function run() {
         }
         const url = `${jiraProjectUrl}/${issueId}`;
         const link = `[${issueId}](${url})\n\n---\n`;
-        const startsWithRegex = new RegExp(`^${link}`, 'i');
-        if (pullRequest.body?.match(startsWithRegex)) {
+        if (pullRequest.body?.startsWith(link)) {
             return;
         }
         await octokit.rest.pulls.update({
