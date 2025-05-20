@@ -3,10 +3,6 @@ export function extractIssueId(source: string, pattern: RegExp): string | null {
   const match = source.match(pattern);
 
   // If a match is found, return the issue ID
-  if (match && match[0]) {
-    return match[0];
-  }
-
   // If no match is found, return null
-  return null;
+  return match?.[0] ?? null;
 }

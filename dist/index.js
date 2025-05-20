@@ -31234,14 +31234,11 @@ function extractIssueId(source, pattern) {
     // Match the branch name against the pattern
     const match = source.match(pattern);
     // If a match is found, return the issue ID
-    if (match && match[0]) {
-        return match[0];
-    }
     // If no match is found, return null
-    return null;
+    return match?.[0] ?? null;
 }
 
-const DEFAULT_ISSUE_REGEX = /^[A-Z,a-z]{2,}-\d{1,}/g;
+const DEFAULT_ISSUE_REGEX = /[A-Z,a-z]{2,}-\d{1,}/;
 /**
  * The main function for the action.
  *
@@ -31256,26 +31253,40 @@ async function run() {
             coreExports.setFailed('No pull request found.');
             return;
         }
-        const title = pullRequest.title;
-        const branchName = pullRequest.head.ref;
-        coreExports.info(`Title: ${title}`);
-        coreExports.info(`Branch name: ${branchName}`);
-        const pattern = new RegExp(coreExports.getInput('jira-issue-regex') || DEFAULT_ISSUE_REGEX);
+        const title = pullRequest.title.trim();
+        const branchName = pullRequest.head.ref.trim();
+        const failIfIssueNotFound = coreExports.getInput('fail-if-issue-not-found') === 'true';
         const jiraProjectUrl = coreExports.getInput('jira-project-url');
+        const pattern = new RegExp(coreExports.getInput('jira-issue-regex') || DEFAULT_ISSUE_REGEX);
+        coreExports.info(`Title: ${title}`);
+        coreExports.info(`Branch: ${branchName}`);
+        coreExports.info(`JIRA project URL: ${jiraProjectUrl}`);
+        coreExports.info(`Regex: ${pattern}`);
         const issueId = extractIssueId(title, pattern) || extractIssueId(branchName, pattern);
         if (issueId === null) {
-            coreExports.setFailed(`FAILED: ${pattern} not found in ${title} or ${branchName}`);
+            const message = `\`${pattern}\` was not found in \`${title}\` or \`${branchName}\``;
+            if (failIfIssueNotFound) {
+                coreExports.setFailed(`FAILED: ${message}`);
+            }
+            else {
+                coreExports.info(`${message}`);
+            }
             return;
         }
+        coreExports.info(`Found issue ID: ${issueId}`);
         const url = `${jiraProjectUrl}/${issueId}`;
-        const link = `[${issueId}](${url})\n---\n`;
+        const link = `[${issueId}](${url})`;
+        coreExports.info(`Issue URL: ${url}`);
         if (pullRequest.body?.startsWith(link)) {
+            coreExports.info(`Pull request body already contains the issue link: ${link}`);
             return;
         }
+        // Update the pull request body with the issue link
+        coreExports.info(`Updating pull request body with the issue link: ${link}`);
         await octokit.rest.pulls.update({
             ...githubExports.context.repo,
             pull_number: pullRequest.number,
-            body: `${link}${pullRequest.body ?? ''}`
+            body: `${link}\n---\n${pullRequest.body ?? ''}`
         });
         coreExports.setOutput('jira-issue-id', issueId);
         coreExports.setOutput('jira-issue-url', url);

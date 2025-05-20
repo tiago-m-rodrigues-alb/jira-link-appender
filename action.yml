@@ -12,12 +12,18 @@ branding:
 # Define your inputs here.
 inputs:
   jira-project-url:
-    description: 'Link of your project URL'
+    description:
+      'Link of your project URL. Ex: https://xyz.atlassian.net/issues'
     required: true
   jira-issue-regex:
     description:
       'The regex to extract the issue ID from the branch name or PR title'
     required: false
+  fail-if-issue-not-found:
+    description:
+      'Fail the action if no issue ID is found in the branch name or PR title'
+    required: false
+    default: 'false'
   GITHUB_TOKEN:
     description: 'Automatically added token'
     required: true
