@@ -31275,7 +31275,7 @@ async function run() {
         await octokit.rest.pulls.update({
             ...githubExports.context.repo,
             pull_number: pullRequest.number,
-            body: `${link}${pullRequest.body}`
+            body: `${link}${pullRequest.body ?? ''}`
         });
         coreExports.setOutput('jira-issue-id', issueId);
         coreExports.setOutput('jira-issue-link', link);

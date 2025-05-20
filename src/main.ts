@@ -55,7 +55,7 @@ export async function run(): Promise<void> {
     await octokit.rest.pulls.update({
       ...github.context.repo,
       pull_number: pullRequest.number,
-      body: `${link}${pullRequest.body}`
+      body: `${link}${pullRequest.body ?? ''}`
     });
 
     core.setOutput('jira-issue-id', issueId);
